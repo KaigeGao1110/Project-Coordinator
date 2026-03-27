@@ -1,3 +1,41 @@
+---
+name: project-coordinator
+version: 1.0.4
+description: |
+  Spawns an isolated Project Coordinator session that owns a project's context,
+  breaks work into tasks, and spawns subagents for parallel execution.
+command-dispatch: tool
+command-tool: project-coordinator-start
+command-arg-mode: raw
+permissions:
+  - spawn: subagent sessions
+  - read: workspace files
+  - exec: shell commands via subagents
+dataPolicy:
+  archivedData: internal workspace only
+  neverExternal: true
+---
+
+## Tools
+
+### project-coordinator-start
+
+**Input:** Project description following "//start "
+
+**What it does:**
+- Activates the Project Coordinator pattern for a new project
+- Spawns an isolated coordinator session to manage the project
+- Reports back to main session when done
+
+**When to use:**
+- User says "//start build a WhatsApp bot"
+- User says "//start a new project: [description]"
+- Any multi-step project needing subagent coordination
+
+**Examples:**
+- Input: "//start build a Chrome extension for Gmail"
+- Output: "Starting new project: build a Chrome extension for Gmail. Spawning Project Coordinator..."
+
 # Project Coordinator Skill
 
 A skill for structuring multi-agent project execution with isolated session architecture.
@@ -48,6 +86,10 @@ Activated when:
 - A task will take more than a few minutes
 
 Do NOT activate for: quick questions, simple lookups, one-liner tasks.
+
+### Trigger 3: Slash command
+Type `//start ` followed by your project description to activate the Project Coordinator.
+Example: "//start build a Chrome extension"
 
 ---
 
