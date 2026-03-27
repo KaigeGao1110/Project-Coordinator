@@ -56,7 +56,13 @@ permissions:
   - read: workspace files
   - exec: shell commands via subagents
   - read: own session transcripts only
-configPaths: []
+configPaths:
+  - path: "${SESSION_TRANSCRIPT_PATH:-$HOME/.openclaw/agents/main/sessions/}"
+    description: |
+      Directory containing agent session transcript files (JSONL format).
+      Used for archiving completed project sessions.
+      Default: ~/.openclaw/agents/main/sessions/ (standard for all users).
+      Override via SESSION_TRANSCRIPT_PATH env var for custom session storage.
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
@@ -152,19 +158,28 @@ When the user says "archive this", archive the Coordinator session and all its s
 Before any commit, run sanitization on all transcript files. Replace sensitive strings:
 
 ```python
-# Sanitize transcript: remove API keys, tokens, emails, IPs
+# Improved sanitize: catches more credential patterns
 def sanitize(text):
+    import re
     patterns = [
-        (r'ghp_[a-zA-Z0-9]+', '[REDACTED-GITHUB-TOKEN]'),
-        (r'github_pat_[a-zA-Z0-9_]+', '[REDACTED-GITHUB-TOKEN]'),
-        (r'AIza[a-zA-Z0-9_-]+', '[REDACTED-API-KEY]'),
-        (r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', '[REDACTED-EMAIL]'),
-        (r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', '[REDACTED-IP]'),
+        # API keys and tokens
+        (r'ghp_[a-zA-Z0-9]{36}', '[REDACTED-GITHUB-TOKEN]'),
+        (r'github_pat_[a-zA-Z0-9_]{22,}', '[REDACTED-GITHUB-TOKEN]'),
+        (r'xox[baprs]-[a-zA-Z0-9]{10,}', '[REDACTED-SLACK-TOKEN]'),
+        (r'AIza[a-zA-Z0-9_-]{30,}', '[REDACTED-API-KEY]'),
+        (r'ya29\.[a-zA-Z0-9_-]{100,}', '[REDACTED-API-KEY]'),
+        (r'sk-[a-zA-Z0-9]{48}', '[REDACTED-OPENAI-KEY]'),
+        (r'sk_proj_[a-zA-Z0-9]{48}', '[REDACTED-OPENAI-KEY]'),
+        (r'[\w.-]+@[\w.-]+\.\w+', '[REDACTED-EMAIL]'),
+        (r'\+?[\d\s\-\(\)]{10,}\d{4,}', '[REDACTED-PHONE]'),
+        (r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', '[REDACTED-IP]'),
         (r'Bearer [a-zA-Z0-9_-]+', '[REDACTED-TOKEN]'),
+        (r'Bearer\s+([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+', '[REDACTED-JWT]'),
+        (r'aws_access_key_id\s*=\s*[A-Z0-9]{16}', '[REDACTED-AWS-KEY]'),
+        (r'aws_secret_access_key\s*=\s*[A-Za-z0-9/+=]{40}', '[REDACTED-AWS-SECRET]'),
     ]
     for pattern, replacement in patterns:
-        import re
-        text = re.sub(pattern, replacement, text)
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
     return text
 ```
 
