@@ -1,6 +1,6 @@
 ---
 name: project-coordinator
-version: 1.0.7
+version: 1.0.8
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
@@ -47,7 +47,7 @@ A skill for structuring multi-agent project execution with isolated session arch
 
 ```yaml
 name: project-coordinator
-version: 1.0.7
+version: 1.0.8
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
@@ -149,33 +149,16 @@ When the user says "archive this", archive the Coordinator session and all its s
 - Subagent transcripts are in the same directory
 
 **5b. Sanitize before archiving:**
-Before any commit, run sanitization on all transcript files. Replace sensitive strings:
+Before any commit, run sanitization on all transcript files using the archive-project skill's sanitization script:
 
-```python
-# Improved sanitize: catches more credential patterns
-def sanitize(text):
-    import re
-    patterns = [
-        # API keys and tokens
-        (r'ghp_[a-zA-Z0-9]{36}', '[REDACTED-GITHUB-TOKEN]'),
-        (r'github_pat_[a-zA-Z0-9_]{22,}', '[REDACTED-GITHUB-TOKEN]'),
-        (r'xox[baprs]-[a-zA-Z0-9]{10,}', '[REDACTED-SLACK-TOKEN]'),
-        (r'AIza[a-zA-Z0-9_-]{30,}', '[REDACTED-API-KEY]'),
-        (r'ya29\.[a-zA-Z0-9_-]{100,}', '[REDACTED-API-KEY]'),
-        (r'sk-[a-zA-Z0-9]{48}', '[REDACTED-OPENAI-KEY]'),
-        (r'sk_proj_[a-zA-Z0-9]{48}', '[REDACTED-OPENAI-KEY]'),
-        (r'[\w.-]+@[\w.-]+\.\w+', '[REDACTED-EMAIL]'),
-        (r'\+?[\d\s\-\(\)]{10,}\d{4,}', '[REDACTED-PHONE]'),
-        (r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', '[REDACTED-IP]'),
-        (r'Bearer [a-zA-Z0-9_-]+', '[REDACTED-TOKEN]'),
-        (r'Bearer\s+([a-zA-Z0-9_-]+\.){2}[a-zA-Z0-9_-]+', '[REDACTED-JWT]'),
-        (r'aws_access_key_id\s*=\s*[A-Z0-9]{16}', '[REDACTED-AWS-KEY]'),
-        (r'aws_secret_access_key\s*=\s*[A-Za-z0-9/+=]{40}', '[REDACTED-AWS-SECRET]'),
-    ]
-    for pattern, replacement in patterns:
-        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
-    return text
+```bash
+# Use the archive-project sanitization script (single authoritative implementation)
+python3 ~/.openclaw/workspace/skills/archive-project/scripts/sanitize_transcript.py \
+  --input <transcript.jsonl> \
+  --output <sanitized.jsonl>
 ```
+
+The script covers all credential types: GitHub tokens, OpenAI/Anthropic keys, AWS credentials, email addresses, phone numbers, IPv4/IPv6 addresses, internal hostnames, and high-entropy secrets. See the archive-project skill for the full redaction reference.
 
 Apply to all transcript files before archiving.
 

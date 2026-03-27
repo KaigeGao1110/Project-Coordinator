@@ -1,10 +1,32 @@
 # Project Coordinator Skill
 
+![Version](https://img.shields.io/badge/version-1.0.8-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 A skill for structuring multi-agent project execution with isolated session architecture.
 
-## What It Does
+## Installation
 
-When you start a complex project, this skill spawns an isolated Project Coordinator session that owns the project context and spawns subagents for parallel execution. The main session stays lightweight and clean.
+```bash
+# Via ClawhHub
+clawdhub install project-coordinator
+
+# Via Git
+git clone https://github.com/KaigeGao1110/Project-Coordinator ~/.openclaw/workspace/skills/project-coordinator
+```
+
+## Quick Start
+
+Type `//start ` followed by your project description:
+
+```
+//start build a Chrome extension for Gmail
+```
+
+The skill spawns an isolated Project Coordinator session that:
+1. Breaks work into independent tasks
+2. Spawns subagents for parallel execution
+3. Monitors progress and compiles results
 
 ## Architecture
 
