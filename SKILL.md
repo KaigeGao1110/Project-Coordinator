@@ -1,9 +1,10 @@
 ---
 name: project-coordinator
-version: 1.0.4
+version: 1.0.7
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
+homepage: https://github.com/KaigeGao1110/Project-Coordinator
 command-dispatch: tool
 command-tool: project-coordinator-start
 command-arg-mode: raw
@@ -46,7 +47,7 @@ A skill for structuring multi-agent project execution with isolated session arch
 
 ```yaml
 name: project-coordinator
-version: 1.0.4
+version: 1.0.7
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
@@ -56,13 +57,6 @@ permissions:
   - read: workspace files
   - exec: shell commands via subagents
   - read: own session transcripts only
-configPaths:
-  - path: "${SESSION_TRANSCRIPT_PATH:-$HOME/.openclaw/agents/main/sessions/}"
-    description: |
-      Directory containing agent session transcript files (JSONL format).
-      Used for archiving completed project sessions.
-      Default: ~/.openclaw/agents/main/sessions/ (standard for all users).
-      Override via SESSION_TRANSCRIPT_PATH env var for custom session storage.
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
@@ -151,7 +145,7 @@ When all subagents complete:
 When the user says "archive this", archive the Coordinator session and all its subagent sessions:
 
 **5a. Identify transcript files:**
-- The Coordinator's own transcript is in the standard session directory: `~/.openclaw/agents/main/sessions/`
+- The Coordinator's own transcript, identified by its session key: `~/.openclaw/agents/<COORDINATOR_SESSION_KEY>/sessions/`
 - Subagent transcripts are in the same directory
 
 **5b. Sanitize before archiving:**
@@ -193,6 +187,8 @@ NEVER auto-delete. Always ask: "Can I delete the archived session files? They ar
 ---
 
 ## Coordinator's Tool Usage
+
+**Subagent sandboxing:** When spawning subagents, each subagent runs in an isolated sandbox with workspace-only filesystem access. Subagents cannot access credentials, environment variables, or session transcripts outside their scope. Network access is restricted per platform policy.
 
 The Coordinator SHOULD directly call tools:
 - `exec` — run commands, check files
