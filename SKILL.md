@@ -1,17 +1,23 @@
 ---
 name: project-coordinator
-version: 1.0.8
+version: 1.0.9
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
 homepage: https://github.com/KaigeGao1110/Project-Coordinator
+dependencies:
+  - archive-project
+configPaths:
+  - ~/.openclaw/agents/main/sessions/
 command-dispatch: tool
 command-tool: project-coordinator-start
 command-arg-mode: raw
 permissions:
   - spawn: subagent sessions
   - read: workspace files
+  - read: session transcripts from ~/.openclaw/agents/main/sessions/ (archive step only, requires user approval)
   - exec: shell commands via subagents
+  - exec: archive-project sanitize_transcript.py (archive step only)
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
@@ -74,7 +80,7 @@ Main Session (never runs code directly)
 
 **Token efficiency**: Each project Coordinator is isolated. Old project sessions accumulate zero main-session tokens after completion.
 
-**Session isolation**: By OpenClaw platform design, a Coordinator can only read its own session transcripts, not other sessions' transcripts.
+**Session isolation**: By OpenClaw platform design, a Coordinator can only read its own session transcripts during active execution. The archive step (Step 5) is an explicit exception — it reads transcript files from `~/.openclaw/agents/main/sessions/` with user approval, using the `archive-project` skill's sanitization script. This access is declared in `configPaths` and `permissions`.
 
 ---
 
