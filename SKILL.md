@@ -7,17 +7,14 @@ description: |
 homepage: https://github.com/KaigeGao1110/Project-Coordinator
 dependencies:
   - archive-project
-configPaths:
-  - ~/.openclaw/agents/main/sessions/
+configPaths: []
 command-dispatch: tool
 command-tool: project-coordinator-start
 command-arg-mode: raw
 permissions:
   - spawn: subagent sessions
   - read: workspace files
-  - read: session transcripts from ~/.openclaw/agents/main/sessions/ (archive step only, requires user approval)
   - exec: shell commands via subagents
-  - exec: archive-project sanitize_transcript.py (archive step only)
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
@@ -53,7 +50,7 @@ A skill for structuring multi-agent project execution with isolated session arch
 
 ```yaml
 name: project-coordinator
-version: 1.0.8
+version: 1.0.9
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
@@ -62,7 +59,6 @@ permissions:
   - spawn: subagent sessions (via sessions_spawn)
   - read: workspace files
   - exec: shell commands via subagents
-  - read: own session transcripts only
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
@@ -80,7 +76,7 @@ Main Session (never runs code directly)
 
 **Token efficiency**: Each project Coordinator is isolated. Old project sessions accumulate zero main-session tokens after completion.
 
-**Session isolation**: By OpenClaw platform design, a Coordinator can only read its own session transcripts during active execution. The archive step (Step 5) is an explicit exception — it reads transcript files from `~/.openclaw/agents/main/sessions/` with user approval, using the `archive-project` skill's sanitization script. This access is declared in `configPaths` and `permissions`.
+**Least-privilege design**: The Coordinator does NOT read session transcript files directly. All transcript reading, sanitization, and archiving is delegated to a dedicated archive-subagent using the archive-project skill.
 
 ---
 
@@ -90,6 +86,7 @@ Activated when:
 - User says "start a new project" or "let's work on [project]"
 - A task is complex and needs multiple subagents
 - A task will take more than a few minutes
+- When user says "archive this" after a project is done → spawn archive-subagent
 
 Do NOT activate for: quick questions, simple lookups, one-liner tasks.
 
@@ -146,36 +143,25 @@ When all subagents complete:
 2. Write a final summary
 3. Save any deliverables before the Coordinator session ends
 
-### Step 5: Archive (when project is done)
+### Step 5: Archiving (Delegated)
 
-When the user says "archive this", archive the Coordinator session and all its subagent sessions:
+When a project is complete and archiving is requested:
 
-**5a. Identify transcript files:**
-- The Coordinator's own transcript, identified by its session key: `~/.openclaw/agents/<COORDINATOR_SESSION_KEY>/sessions/`
-- Subagent transcripts are in the same directory
+1. The Coordinator spawns an archive-subagent
+2. The archive-subagent uses the archive-project skill to handle:
+   - Locating the correct session transcripts
+   - Sanitizing credentials
+   - Writing ARCHIVE.md
+   - Committing to workspace
+3. The Coordinator monitors the archive-subagent and reports completion
 
-**5b. Sanitize before archiving:**
-Before any commit, run sanitization on all transcript files using the archive-project skill's sanitization script:
-
-```bash
-# Use the archive-project sanitization script (single authoritative implementation)
-python3 ~/.openclaw/workspace/skills/archive-project/scripts/sanitize_transcript.py \
-  --input <transcript.jsonl> \
-  --output <sanitized.jsonl>
-```
-
-The script covers all credential types: GitHub tokens, OpenAI/Anthropic keys, AWS credentials, email addresses, phone numbers, IPv4/IPv6 addresses, internal hostnames, and high-entropy secrets. See the archive-project skill for the full redaction reference.
-
-Apply to all transcript files before archiving.
-
-**5c. Delete transcript files only after explicit user approval.**
-NEVER auto-delete. Always ask: "Can I delete the archived session files? They are already backed up."
-
-**5d. Update MEMORY.md** with a one-line project summary.
+**The Coordinator itself does NOT read session transcript files directly.**
 
 ---
 
 ## Coordinator's Tool Usage
+
+**Note:** The Coordinator should NOT directly read, copy, move, or delete session transcript files. All such operations must be performed by a dedicated archive-subagent using the archive-project skill.
 
 **Subagent sandboxing:** When spawning subagents, each subagent runs in an isolated sandbox with workspace-only filesystem access. Subagents cannot access credentials, environment variables, or session transcripts outside their scope. Network access is restricted per platform policy.
 
