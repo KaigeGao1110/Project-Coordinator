@@ -1,6 +1,6 @@
 ---
 name: project-coordinator
-version: 1.0.9
+version: 1.0.10
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
@@ -50,7 +50,7 @@ A skill for structuring multi-agent project execution with isolated session arch
 
 ```yaml
 name: project-coordinator
-version: 1.0.9
+version: 1.0.10
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
