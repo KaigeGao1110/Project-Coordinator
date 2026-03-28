@@ -1,6 +1,6 @@
 ---
 name: project-coordinator
-version: 1.0.11
+version: 1.0.12
 homepage: https://github.com/KaigeGao1110/Project-Coordinator
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
