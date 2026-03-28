@@ -41,12 +41,6 @@ unzip /tmp/project-coordinator.zip -d ~/.openclaw/skills/
 mv ~/.openclaw/skills/Project-Coordinator-main ~/.openclaw/skills/project-coordinator
 ```
 
-### Option 3: Copy from local workspace (this machine)
-```bash
-cp -r /home/ubuntu/.openclaw/workspace/skills/project-coordinator ~/.openclaw/skills/
-openclaw gateway restart
-```
-
 ## Tools
 
 ### project-coordinator-start
