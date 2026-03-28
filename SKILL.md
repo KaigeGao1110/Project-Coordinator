@@ -16,9 +16,6 @@ permissions:
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
-command-dispatch: tool
-command-tool: project-coordinator-start
-command-arg-mode: raw
 ---
 
 ## Installation
@@ -40,26 +37,6 @@ curl -L https://github.com/KaigeGao1110/Project-Coordinator/archive/refs/heads/m
 unzip /tmp/project-coordinator.zip -d ~/.openclaw/skills/
 mv ~/.openclaw/skills/Project-Coordinator-main ~/.openclaw/skills/project-coordinator
 ```
-
-## Tools
-
-### project-coordinator-start
-
-**Input:** Project description following "//start "
-
-**What it does:**
-- Activates the Project Coordinator pattern for a new project
-- Spawns an isolated coordinator session to manage the project
-- Reports back to main session when done
-
-**When to use:**
-- User says "//start build a WhatsApp bot"
-- User says "//start a new project: [description]"
-- Any multi-step project needing subagent coordination
-
-**Examples:**
-- Input: "//start build a Chrome extension for Gmail"
-- Output: "Starting new project: build a Chrome Extension for Gmail. Spawning Project Coordinator..."
 
 # Project Coordinator Skill
 
