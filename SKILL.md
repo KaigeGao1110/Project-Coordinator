@@ -1,16 +1,14 @@
 ---
 name: project-coordinator
-version: 1.0.10
+version: 1.0.11
+homepage: https://github.com/KaigeGao1110/Project-Coordinator
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
-homepage: https://github.com/KaigeGao1110/Project-Coordinator
 dependencies:
   - archive-project
+required: {}
 configPaths: []
-command-dispatch: tool
-command-tool: project-coordinator-start
-command-arg-mode: raw
 permissions:
   - spawn: subagent sessions
   - read: workspace files
@@ -18,7 +16,36 @@ permissions:
 dataPolicy:
   archivedData: internal workspace only
   neverExternal: true
+command-dispatch: tool
+command-tool: project-coordinator-start
+command-arg-mode: raw
 ---
+
+## Installation
+
+### Option 1: ClawhHub CLI (recommended)
+```bash
+openclaw skills install project-coordinator
+# or
+clawhub install project-coordinator
+```
+
+### Option 2: From GitHub
+```bash
+# Clone the repo
+git clone https://github.com/KaigeGao1110/Project-Coordinator.git ~/.openclaw/skills/project-coordinator
+
+# Or download directly
+curl -L https://github.com/KaigeGao1110/Project-Coordinator/archive/refs/heads/main.zip -o /tmp/project-coordinator.zip
+unzip /tmp/project-coordinator.zip -d ~/.openclaw/skills/
+mv ~/.openclaw/skills/Project-Coordinator-main ~/.openclaw/skills/project-coordinator
+```
+
+### Option 3: Copy from local workspace (this machine)
+```bash
+cp -r /home/ubuntu/.openclaw/workspace/skills/project-coordinator ~/.openclaw/skills/
+openclaw gateway restart
+```
 
 ## Tools
 
@@ -38,7 +65,7 @@ dataPolicy:
 
 **Examples:**
 - Input: "//start build a Chrome extension for Gmail"
-- Output: "Starting new project: build a Chrome extension for Gmail. Spawning Project Coordinator..."
+- Output: "Starting new project: build a Chrome Extension for Gmail. Spawning Project Coordinator..."
 
 # Project Coordinator Skill
 
@@ -50,7 +77,7 @@ A skill for structuring multi-agent project execution with isolated session arch
 
 ```yaml
 name: project-coordinator
-version: 1.0.10
+version: 1.0.11
 description: |
   Spawns an isolated Project Coordinator session that owns a project's context,
   breaks work into tasks, and spawns subagents for parallel execution.
